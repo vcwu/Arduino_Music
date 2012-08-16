@@ -34,9 +34,13 @@ Speaker-   speakerOut -> speaker -> ground
 Capsense-  sendPin -> 10 megohm resistor -> foil -> receive pin 
 */
 
-int speakerOut = 9;
-int sendPin = 4;      
+int speakerOut = 9;		//Speaker
+int sendPin = 4;      	//Capsense
 int receivePin = 2; 
+
+int ledPins[] = {5};						//PINS for LEDs
+int ledSize = sizeof(ledPins)/sizeof(int);
+int ledCounter = 0;							//keep track of which LED to light
 
 /**
 --------------------------------------------
@@ -54,7 +58,7 @@ int melody[] = {c4, c4, g4, g4, a4, a4, g4, f4, f4, e4, e4, d4, d4, c4,
 */
 
 int melodySize =  sizeof(melody)/sizeof(int);
-int counter = 0;  				//keep track of which note of melody
+int melCounter = 0;  			//keep track of which note of melody
 enum {NONE, INCR, TOUCH};		//State - no touch, letting go, touch
 int state = NONE;				//Current state
 
@@ -65,7 +69,13 @@ void setup()
 {
 
    cs_4_2.set_CS_AutocaL_Millis(0xFFFFFFFF);     // turn off autocalibrate on channel 1 - just as an example
+   
    pinMode(speakerOut, OUTPUT);                  //set speakerOut pin to OUTPUT
+   for(int i =0; i < ledSize; i++)				 //set all ledPins to OUTPUT
+   {
+   		pinMode(ledPins[i], OUTPUT);
+   }
+   
    Serial.begin(9600);                           //use serial for debugging
 
 }
@@ -87,21 +97,34 @@ void loop()
 		//TOUCH state - while you are touching sensor. 
 		case (TOUCH):
 		{
-			int freq = melody[counter];	//Set freq to note in melody array
-			tone(speakerOut, freq);		//Play note from speaker
+			//Playing the note
+			int freq = melody[melCounter];	//Set freq to note in melody array
+			tone(speakerOut, freq);			//Play note from speaker
 			Serial.print("Freq ");
 			Serial.print(freq);
+			
+			//Lighting up an LED as well
+			digitalWrite(ledPins[ledCounter], HIGH);	//set LED on
+
 			state = INCR; 				//Set next state to INCR
 			break;
 		}
 		case(INCR):
 		{
-			if(counter < melodySize - 1)	//Set to play next note
-				counter++;
+			if(melCounter < melodySize - 1)	//Set to play next note	
+				melCounter++;
 			else
-				counter = 0;
-			Serial.print(" \t COUNTER: ");
-			Serial.print(counter);
+				melCounter = 0;
+			Serial.print(" \t MEL COUNTER: ");
+			Serial.print(melCounter);
+			
+			if(ledCounter < ledSize - 1)	//Set to light up next LED
+				ledCounter++;
+			else
+				ledCounter = 0;
+			Serial.print(" \t LED COUNTER: ");
+			Serial.print(ledCounter);
+			
 			state = NONE;
 			break;
 		}
@@ -109,6 +132,11 @@ void loop()
 		{
 			noTone(speakerOut);			//Stop playing note from speaker
 			Serial.print("Freq ");
+			Serial.print(0); 
+			Serial.print("\t ");
+			
+			digitalWrite(ledPins[ledCounter], LOW);	//Stop lighting up LED
+			Serial.print("LED ");
 			Serial.print(0); 
 			Serial.print("\t ");
 			break;
@@ -153,5 +181,6 @@ void buzz(int targetPin, long frequency, long length) {
         delayMicroseconds(delayValue); 		// wait again for the calculated delay value
     }
 }
+
 
 
