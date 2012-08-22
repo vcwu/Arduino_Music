@@ -34,11 +34,11 @@ Speaker-   speakerOut -> speaker -> ground
 Capsense-  sendPin -> 10 megohm resistor -> foil -> receive pin 
 */
 
-int speakerOut = 9;		//Speaker
-int sendPin = 4;      	//Capsense
-int receivePin = 2; 
+int speakerOut = 12;		//Speaker
+int sendPin = 11;      	//Capsense
+int receivePin = 10; 
 
-int ledPins[] = {5};						//PINS for LEDs
+int ledPins[] = {2,4,6,8};						//PINS for LEDs
 int ledSize = sizeof(ledPins)/sizeof(int);
 int ledCounter = 0;							//keep track of which LED to light
 
@@ -118,13 +118,16 @@ void loop()
 			Serial.print(" \t MEL COUNTER: ");
 			Serial.print(melCounter);
 			
+			digitalWrite(ledPins[ledCounter], LOW);	//Stop lighting up LED
+			Serial.print("LED ");
+			Serial.print(0); 
+			Serial.print("\t ");
+			
 			if(ledCounter < ledSize - 1)	//Set to light up next LED
 				ledCounter++;
 			else
 				ledCounter = 0;
-			Serial.print(" \t LED COUNTER: ");
-			Serial.print(ledCounter);
-			
+
 			state = NONE;
 			break;
 		}
@@ -134,11 +137,7 @@ void loop()
 			Serial.print("Freq ");
 			Serial.print(0); 
 			Serial.print("\t ");
-			
-			digitalWrite(ledPins[ledCounter], LOW);	//Stop lighting up LED
-			Serial.print("LED ");
-			Serial.print(0); 
-			Serial.print("\t ");
+
 			break;
 		}
     }
